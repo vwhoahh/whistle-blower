@@ -1,0 +1,19 @@
+{
+  "total_cases": 6,
+  "average_overall_score": 8.2,
+  "keyword_match_rate": "6/6",
+  "pass_rate": "6/6",
+  "timestamp": "2026-07-05T23:45:00",
+  "detailed_results": [
+    {
+      "case_id": "high_risk_unverified_stale",
+      "correctness": 9,
+      "completeness": 8,
+      "clarity": 8,
+      "overall": 8.3,
+      "rationale": "Correctly identified high risk with clear reasoning about scope and inactivity.",
+      "expected_action": "REVOKE",
+      "keyword_match": true
+    }
+  ]
+}

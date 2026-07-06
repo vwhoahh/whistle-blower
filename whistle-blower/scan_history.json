@@ -1,0 +1,101 @@
+[
+  {
+    "scan_id": "0d5bca55",
+    "timestamp": "2026-07-06T22:54:44.445046",
+    "high_risk": 1,
+    "medium_risk": 1,
+    "low_risk": 2,
+    "total": 4,
+    "summary": "Your current security posture is mixed; while you maintain essential, low-risk tools, the presence of an outdated high-risk scraper and a questionable widget creates unnecessary vulnerabilities. By revoking the identified high and medium-risk applications, you will effectively close potential entry points for unauthorized access, thereby significantly strengthening your overall digital hygiene."
+  },
+  {
+    "scan_id": "ac3789b1",
+    "timestamp": "2026-07-06T23:10:03.289370",
+    "high_risk": 1,
+    "medium_risk": 1,
+    "low_risk": 2,
+    "total": 4,
+    "summary": "Your current security posture contains unnecessary risks primarily driven by dormant, unverified third-party integrations. By revoking access for high-risk and unused applications, you significantly reduce the 'attack surface' of your account. We recommend maintaining only the trusted, low-risk tools necessary for your daily work to ensure long-term data security and privacy."
+  },
+  {
+    "scan_id": "0c3a9171",
+    "timestamp": "2026-07-06T23:16:51.321068",
+    "high_risk": 1,
+    "medium_risk": 1,
+    "low_risk": 2,
+    "total": 4,
+    "summary": "Your overall security posture is good, but requires the removal of dormant, high-risk legacy applications. By revoking 'DataScraper Pro 2021', you significantly reduce your attack surface and eliminate unnecessary exposure of sensitive data like contacts and Google Drive files. The remaining applications are verified, actively used, and maintain minimal, appropriate access levels, posing little risk to your account security."
+  },
+  {
+    "scan_id": "945be761",
+    "timestamp": "2026-07-06T23:30:55.337486",
+    "high_risk": 0,
+    "medium_risk": 1,
+    "low_risk": 2,
+    "total": 3,
+    "summary": "Your current security posture is healthy. All identified applications are actively used, verified, and pose minimal risk to your digital hygiene. No immediate revocations are necessary at this time as all integrations serve a clear purpose and demonstrate trustworthy behavior."
+  },
+  {
+    "scan_id": "1c7b302a",
+    "timestamp": "2026-07-06T23:33:16.696255",
+    "high_risk": 1,
+    "medium_risk": 1,
+    "low_risk": 2,
+    "total": 4,
+    "summary": "Your digital hygiene score is currently hindered by legacy and unnecessary third-party permissions. We recommend revoking access for dormant or high-risk apps to minimize your attack surface, while maintaining trust in standard, low-risk tools essential for your daily workflow. The remediation resulted in revoking 'DataScraper Pro 2021' and 'Quick Calendar Widget'."
+  },
+  {
+    "scan_id": "934b0bf7",
+    "timestamp": "2026-07-06T23:37:40.827359",
+    "high_risk": 0,
+    "medium_risk": 0,
+    "low_risk": 2,
+    "total": 2,
+    "summary": "Your current security posture is excellent. Both applications identified are verified, trusted services with limited access permissions and clear, recent user activity. No immediate remediation or revocation is required to maintain your digital hygiene."
+  },
+  {
+    "scan_id": "6b06c56b",
+    "timestamp": "2026-07-06T23:41:11.702596",
+    "high_risk": 1,
+    "medium_risk": 0,
+    "low_risk": 3,
+    "total": 4,
+    "summary": "Your current security posture is generally good, but you have one critical vulnerability due to legacy software. By revoking access for the unused, high-risk DataScraper Pro application, you significantly reduce your attack surface. The remaining applications are trusted, actively maintained, and pose minimal risk to your data privacy."
+  },
+  {
+    "scan_id": "40394311",
+    "timestamp": "2026-07-06T23:49:08.217331",
+    "high_risk": 0,
+    "medium_risk": 1,
+    "low_risk": 2,
+    "total": 3,
+    "summary": "Your overall security posture is excellent. All currently connected applications are either core services or verified tools that you use frequently. Because all these apps serve a clear purpose in your daily productivity and are considered low-to-medium risk, no revocations are recommended at this time. You are encouraged to review these permissions again in a few months to ensure they remain relevant to your needs."
+  },
+  {
+    "scan_id": "e65ec9f0",
+    "timestamp": "2026-07-07T00:15:23.209807",
+    "high_risk": 1,
+    "medium_risk": 1,
+    "low_risk": 2,
+    "total": 4,
+    "summary": "Your overall security posture is currently moderate but requires attention. We recommend removing the 'DataScraper Pro' application immediately, as its long period of inactivity combined with an unverified status creates an unnecessary entry point for malicious actors. Keeping active, low-to-medium risk apps is acceptable, provided they remain in regular use and you occasionally review their permissions."
+  },
+  {
+    "scan_id": "82b8d76d",
+    "timestamp": "2026-07-07T00:24:14.909293",
+    "high_risk": 0,
+    "medium_risk": 1,
+    "low_risk": 2,
+    "total": 3,
+    "summary": "Your overall security posture is good. While your main productivity tools remain low-risk and essential, I recommend revoking access for the calendar widget to adhere to the principle of least privilege, as it possesses write permissions that could pose an unnecessary security risk to your scheduling data."
+  },
+  {
+    "scan_id": "0a97146f",
+    "timestamp": "2026-07-07T00:29:27.875147",
+    "high_risk": 1,
+    "medium_risk": 0,
+    "low_risk": 2,
+    "total": 3,
+    "summary": "Your overall security posture is good, but requires the removal of one high-risk, stale application. The DataScraper Pro 2021 tool represents a significant security vulnerability due to its broad access permissions and lack of activity. By revoking this app, you reduce your attack surface significantly. The remaining applications are verified and necessary for your daily operations, posing minimal risk to your data."
+  }
+]

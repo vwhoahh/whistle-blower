@@ -1,0 +1,3117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhistleBlower - AI Digital Hygiene & OAuth Security Agent</title>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0b1220;
+            --card-bg: rgba(17, 24, 39, 0.75);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --accent-cyan: #00f0ff;
+            --accent-blue: #0066ff;
+            --danger-red: #ff3b30;
+            --warning-orange: #ff9500;
+            --success-green: #34c759;
+            --text-primary: #ffffff;
+            --text-secondary: #8e9aaf;
+            --glow-cyan: rgba(0, 240, 255, 0.15);
+            --glow-red: rgba(255, 59, 48, 0.25);
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Cyber grid background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Background glow blobs */
+        .glow-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-cyan);
+            top: 10%;
+            left: 10%;
+        }
+
+        .glow-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--accent-blue);
+            bottom: 10%;
+            right: 15%;
+        }
+
+        .glow-red-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle, transparent 40%, rgba(255, 59, 48, 0.08) 100%);
+            box-shadow: inset 0 0 100px rgba(255, 59, 48, 0.15);
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .glow-red-overlay.active {
+            opacity: 1;
+        }
+
+        header, main, footer, .demo-console {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 2.5rem;
+            background: rgba(11, 18, 32, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            color: var(--accent-cyan);
+            filter: drop-shadow(0 0 8px var(--accent-cyan));
+        }
+
+        .logo-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            background: linear-gradient(90deg, var(--text-primary) 0%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid rgba(52, 199, 89, 0.2);
+            padding: 0.35rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--success-green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-green);
+            border-radius: 50%;
+            animation: pulse-green 1.5s infinite;
+        }
+
+        .profile-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 240, 255, 0.05);
+        }
+
+        /* Main Container & Grid */
+        main {
+            flex: 1;
+            padding: 2rem 2.5rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Storyboard Layout Panels */
+        .story-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            min-height: 540px;
+        }
+
+        @media (max-width: 1024px) {
+            .story-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .view-panel {
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Scene 0 & 1: Hero & Incident styles */
+        .hero-title-container {
+            text-align: center;
+            max-width: 800px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .shield-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .shield-svg-bg {
+            color: rgba(0, 240, 255, 0.08);
+            animation: shield-pulse 3s ease-in-out infinite;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text-primary) 30%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            z-index: 5;
+            position: relative;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .status-badge-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .status-badge {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid var(--card-border);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .status-badge-title {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .status-badge-value.online {
+            color: var(--success-green);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .metric-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-cyan);
+        }
+
+        .metric-card.danger::before {
+            background: var(--danger-red);
+        }
+
+        .metric-card.warning::before {
+            background: var(--warning-orange);
+        }
+
+        .metric-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: var(--font-mono);
+        }
+
+        /* Incident Overlay (Scene 1) */
+        .incident-card {
+            background: rgba(26, 15, 15, 0.85);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            box-shadow: 0 0 30px rgba(255, 59, 48, 0.15);
+            max-width: 600px;
+            width: 100%;
+            animation: pulse-red-border 2s infinite;
+        }
+
+        .incident-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--danger-red);
+            font-weight: 800;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(255, 59, 48, 0.2);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .incident-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .incident-meta {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 59, 48, 0.1);
+        }
+
+        .scopes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .scope-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .scope-check {
+            color: var(--danger-red);
+            font-weight: bold;
+        }
+
+        .incident-timeline {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .incident-timeline::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+        .timeline-node {
+            position: relative;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .timeline-node::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: -19px;
+            width: 10px;
+            height: 10px;
+            background-color: var(--danger-red);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--danger-red);
+        }
+
+        .timeline-time {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-right: 0.5rem;
+            font-family: var(--font-mono);
+        }
+
+        /* How did this happen screen */
+        .question-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .question-text {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+            text-align: center;
+            animation: text-glow 2s ease-in-out infinite alternate;
+        }
+
+        /* Scene 2: AI Pipeline Flow */
+        .pipeline-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 700px;
+            padding: 1rem;
+        }
+
+        .pipeline-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .pipeline-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .pipeline-step {
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .pipeline-step.active {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            background: rgba(0, 240, 255, 0.03);
+        }
+
+        .pipeline-step.completed {
+            border-color: var(--success-green);
+            background: rgba(52, 199, 89, 0.03);
+        }
+
+        .pipeline-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--text-secondary);
+        }
+
+        .active .pipeline-icon {
+            color: var(--accent-cyan);
+            filter: drop-shadow(0 0 4px var(--accent-cyan));
+        }
+
+        .completed .pipeline-icon {
+            color: var(--success-green);
+            filter: drop-shadow(0 0 4px var(--success-green));
+        }
+
+        .pipeline-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .active .pipeline-name {
+            color: var(--text-primary);
+        }
+
+        .completed .pipeline-name {
+            color: var(--success-green);
+        }
+
+        .pipeline-task {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            min-height: 24px;
+        }
+
+        .pipeline-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.25rem;
+        }
+
+        .pipeline-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-cyan);
+            transition: width 0.1s linear;
+        }
+
+        .completed .pipeline-progress-fill {
+            background: var(--success-green);
+            width: 100% !important;
+        }
+
+        /* Scene 3: SVG Interactive Graph */
+        .graph-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 480px;
+            background: rgba(10, 15, 28, 0.5);
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+        }
+
+        .network-svg {
+            width: 100%;
+            height: 100%;
+            min-height: 480px;
+        }
+
+        .graph-node {
+            cursor: pointer;
+        }
+
+        .graph-link {
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 1.5;
+            transition: all 0.5s ease;
+        }
+
+        .graph-link.active {
+            stroke: var(--accent-cyan);
+            stroke-width: 2;
+            stroke-dasharray: 4 4;
+            animation: dash 10s linear infinite;
+        }
+
+        .graph-link.warning {
+            stroke: var(--warning-orange);
+            stroke-width: 2;
+        }
+
+        .graph-link.danger {
+            stroke: var(--danger-red);
+            stroke-width: 2;
+            stroke-dasharray: 4 4;
+            animation: dash-danger 10s linear infinite;
+        }
+
+        .node-circle {
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .node-circle.center {
+            fill: #000;
+            stroke: var(--accent-cyan);
+            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.6));
+        }
+
+        .node-circle.safe {
+            fill: #111827;
+            stroke: var(--success-green);
+        }
+
+        .node-circle.medium {
+            fill: #111827;
+            stroke: var(--warning-orange);
+        }
+
+        .node-circle.high {
+            fill: #111827;
+            stroke: var(--danger-red);
+            animation: pulse-danger-node 2s infinite;
+        }
+
+        .graph-node:hover .node-circle {
+            stroke-width: 4;
+            transform: scale(1.1);
+            transform-origin: center;
+        }
+
+        .node-text {
+            fill: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 500;
+            pointer-events: none;
+            transition: fill 0.3s ease;
+        }
+
+        .graph-node:hover .node-text {
+            fill: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .node-circle.center + .node-text {
+            fill: var(--accent-cyan);
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* Graph tooltip */
+        .graph-tooltip {
+            position: absolute;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 0.75rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            max-width: 220px;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.15);
+            font-size: 0.8rem;
+        }
+
+        .graph-tooltip-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .graph-tooltip-item {
+            color: var(--text-secondary);
+            margin: 0.15rem 0;
+        }
+
+        .graph-tooltip-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Scene 4: AI Risk Analysis Panel */
+        .risk-analysis-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.75rem;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .risk-score-badge {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid var(--danger-red);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            color: var(--danger-red);
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        .risk-reasoning-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .risk-reasoning-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .risk-reasoning-bullet {
+            color: var(--danger-red);
+            margin-top: 2px;
+        }
+
+        .risk-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+        }
+
+        .risk-stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .risk-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .risk-stat-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .risk-stat-value.high {
+            color: var(--danger-red);
+        }
+
+        /* Scene 5: Multi-agent discussion */
+        .discussion-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            height: 100%;
+            overflow-y: auto;
+            max-height: 240px;
+            padding-right: 0.5rem;
+        }
+
+        .chat-bubble {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid var(--text-secondary);
+            animation: slide-in-chat 0.3s ease;
+            max-width: 90%;
+        }
+
+        .chat-bubble.risk_agent { border-left-color: var(--warning-orange); }
+        .chat-bubble.permission_agent { border-left-color: var(--accent-cyan); }
+        .chat-bubble.planning_agent { border-left-color: var(--accent-blue); }
+        .chat-bubble.security_agent { border-left-color: #a5b4fc; }
+        .chat-bubble.approval_agent { border-left-color: var(--success-green); }
+
+        .chat-sender {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .chat-sender.risk_agent { color: var(--warning-orange); }
+        .chat-sender.permission_agent { color: var(--accent-cyan); }
+        .chat-sender.planning_agent { color: var(--accent-blue); }
+        .chat-sender.security_agent { color: #a5b4fc; }
+        .chat-sender.approval_agent { color: var(--success-green); }
+
+        .chat-message {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        /* Scene 6: Human Approval Dialog */
+        .approval-card {
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .approval-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+            margin: 0.75rem 0;
+        }
+
+        .approval-app-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--danger-red);
+            font-weight: bold;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: var(--danger-red);
+            color: var(--text-primary);
+        }
+
+        .btn-primary:hover {
+            background: #e0241b;
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--card-border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        /* Scene 8: Before vs After */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        @media (max-width: 600px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comp-card {
+            border-top: 4px solid var(--text-secondary);
+        }
+
+        .comp-card.before {
+            border-top-color: var(--danger-red);
+            background: rgba(26, 15, 15, 0.4);
+        }
+
+        .comp-card.after {
+            border-top-color: var(--success-green);
+            background: rgba(15, 26, 18, 0.4);
+            box-shadow: 0 0 20px rgba(52, 199, 89, 0.05);
+        }
+
+        .comp-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .comp-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .comp-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .comp-row-label {
+            color: var(--text-secondary);
+        }
+
+        .comp-row-val {
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        .before .comp-row-val { color: var(--danger-red); }
+        .after .comp-row-val { color: var(--success-green); }
+
+        /* Scene 9: Executive Report */
+        .report-card {
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(52, 199, 89, 0.1);
+            border: 2px solid var(--success-green);
+            color: var(--success-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            box-shadow: 0 0 15px rgba(52, 199, 89, 0.2);
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.65rem;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+        }
+
+        .report-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .report-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-family: var(--font-mono);
+        }
+
+        .report-recommendations {
+            background: rgba(0, 240, 255, 0.02);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-rec-title {
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .report-rec-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            margin: 0.25rem 0;
+        }
+
+        .report-rec-check {
+            color: var(--success-green);
+        }
+
+        /* final Dashboard cards overlay */
+        .final-dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        @media (max-width: 600px) {
+            .final-dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .final-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+            text-align: center;
+            border-bottom: 3px solid var(--accent-cyan);
+        }
+
+        .final-card.success { border-bottom-color: var(--success-green); }
+        .final-card.danger { border-bottom-color: var(--danger-red); }
+
+        /* Scene management helper */
+        .scene {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fade-in-panel 0.5s ease;
+        }
+
+        .scene.active {
+            display: flex;
+        }
+
+        /* Demo controls docked console */
+        .demo-console {
+            margin: 1.5rem auto 2.5rem;
+            max-width: 800px;
+            width: 90%;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .console-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .console-title {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .console-dots {
+            display: flex;
+            gap: 0.35rem;
+        }
+
+        .console-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff3b30;
+            border-radius: 50%;
+        }
+
+        .console-dot:nth-child(2) { background: #ff9500; }
+        .console-dot:nth-child(3) { background: #34c759; }
+
+        .console-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .scene-indicator {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .scene-indicator-num {
+            color: var(--accent-cyan);
+            font-family: var(--font-mono);
+            margin-right: 0.5rem;
+        }
+
+        .control-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .console-btn {
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            color: var(--accent-cyan);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .console-btn:hover {
+            background: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+            border-color: var(--accent-cyan);
+        }
+
+        .console-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .scene-dots-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .scene-dot-btn {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .scene-dot-btn.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 8px var(--accent-cyan);
+        }
+
+        /* Dynamic keyframes */
+        @keyframes pulse-green {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse-red-border {
+            0% { border-color: rgba(255, 59, 48, 0.3); }
+            50% { border-color: rgba(255, 59, 48, 0.7); box-shadow: 0 0 30px rgba(255, 59, 48, 0.3); }
+            100% { border-color: rgba(255, 59, 48, 0.3); }
+        }
+
+        @keyframes pulse-danger-node {
+            0% { r: 7; filter: drop-shadow(0 0 2px var(--danger-red)); }
+            50% { r: 10; filter: drop-shadow(0 0 10px var(--danger-red)); }
+            100% { r: 7; filter: drop-shadow(0 0 2px var(--danger-red)); }
+        }
+
+        @keyframes shield-pulse {
+            0% { transform: scale(1); opacity: 0.08; }
+            50% { transform: scale(1.1); opacity: 0.15; }
+            100% { transform: scale(1); opacity: 0.08; }
+        }
+
+        @keyframes fade-in-panel {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slide-in-chat {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes text-glow {
+            from { text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 10px rgba(255, 255, 255, 0.2); }
+            to { text-shadow: 0 0 20px rgba(0, 240, 255, 0.6), 0 0 30px rgba(0, 240, 255, 0.4); }
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+
+        @keyframes dash-danger {
+            to { stroke-dashoffset: -100; stroke: var(--danger-red); }
+        }
+
+        /* Tooltip details */
+        .panel-footer-actions {
+            margin-top: auto;
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .success-checkmark {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(52, 199, 89, 0.1);
+            border: 2px solid var(--success-green);
+            color: var(--success-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 20px rgba(52, 199, 89, 0.2);
+            animation: shield-pulse 2s infinite;
+        }
+
+        .cyber-alert-text {
+            color: var(--danger-red);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            letter-spacing: 0.1em;
+            animation: text-blink 1.5s infinite;
+        }
+
+        @keyframes text-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Printable / Report Modal simulator */
+        .report-download-anim {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(11, 18, 32, 0.95);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+            border-radius: 12px;
+        }
+
+        /* Mode toggle styles */
+        .mode-toggle-btn {
+            background: transparent;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--accent-cyan);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .mode-toggle-btn.active {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 8px var(--accent-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
+    <div class="glow-red-overlay" id="redAlertGlow"></div>
+
+    <header>
+        <div class="logo-container">
+            <svg class="logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span class="logo-title" id="logoText">WHISTLEBLOWER</span>
+        </div>
+        <div class="nav-right">
+            <!-- Mode Toggle selector -->
+            <div style="display: flex; gap: 0.25rem; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); padding: 0.2rem; border-radius: 6px;">
+                <button class="mode-toggle-btn active" id="modeStoryBtn" onclick="setMode('story')">STORY PLAYBACK</button>
+                <button class="mode-toggle-btn" id="modeLiveBtn" onclick="setMode('live')">LIVE AI AGENT</button>
+            </div>
+            <div class="connection-status">
+                <div class="status-dot"></div>
+                <span id="protectionText">LIVE PROTECTION: ACTIVE</span>
+            </div>
+            <div class="profile-container">
+                <span>SEC_OPS_USER</span>
+                <div class="profile-avatar">S</div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Story Panel Grid -->
+        <div class="story-container">
+            <!-- Left Panel (Visualisation Area) -->
+            <div class="glass-card view-panel">
+                
+                <!-- Scene 0: Landing / Hero Screen -->
+                <div class="scene active" id="scene0">
+                    <div class="shield-bg">
+                        <svg class="shield-svg-bg" width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="hero-title-container">
+                        <h1 class="hero-title" style="margin-bottom: 0.75rem;">YOUR DIGITAL IDENTITY IS BEING MONITORED</h1>
+                        <p class="hero-subtitle" id="landingSubtitle">Continuous multi-agent OAuth auditing, permission tracking, and real-time threat neutralization with zero legacy footprints.</p>
+                        
+                        <div style="margin: 1.5rem 0;" id="scanBtnContainer">
+                            <button class="btn btn-outline" style="padding: 0.85rem 2rem; font-size: 1rem; border-radius: 50px; font-weight:700;" onclick="triggerScanAction()">
+                                START SCENARIO PLAYBACK
+                            </button>
+                        </div>
+
+                        <div class="status-badge-container">
+                            <div class="status-badge">
+                                <span class="status-badge-title">AI Protection Status</span>
+                                <span class="status-badge-value online" id="protectionBadgeVal">ONLINE</span>
+                            </div>
+                            <div class="status-badge">
+                                <span class="status-badge-title">Last Scan</span>
+                                <span class="status-badge-value" id="lastScanTimeVal">12 Seconds Ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scene 1: Security Incident -->
+                <div class="scene" id="scene1">
+                    <div class="glass-card incident-card">
+                        <div class="incident-header">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span>🚨 SECURITY ALERT</span>
+                        </div>
+                        <div class="incident-body">
+                            <div class="incident-meta">
+                                <div><strong>App:</strong> Unknown OAuth Application Detected</div>
+                            </div>
+                            <div class="scopes-list">
+                                <p style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">Attempting Access To:</p>
+                                <div class="scope-item">
+                                    <span class="scope-check">✓</span> <span>Gmail</span>
+                                </div>
+                                <div class="scope-item">
+                                    <span class="scope-check">✓</span> <span>Contacts</span>
+                                </div>
+                                <div class="scope-item">
+                                    <span class="scope-check">✓</span> <span>Google Drive</span>
+                                </div>
+                            </div>
+                            <div class="incident-timeline">
+                                <div class="timeline-node">
+                                    <span class="timeline-time">09:41 PM</span> OAuth Token Used
+                                </div>
+                                <div class="timeline-node">
+                                    <span class="timeline-time">09:41 PM</span> Reading Emails
+                                </div>
+                                <div class="timeline-node">
+                                    <span class="timeline-time">09:41 PM</span> Reading Contacts
+                                </div>
+                                <div class="timeline-node">
+                                    <span class="timeline-time">09:41 PM</span> Accessing Google Drive Metadata
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Incident Pause Question Overlay -->
+                <div class="question-overlay" id="questionOverlay">
+                    <div class="question-text">How did this happen?</div>
+                </div>
+
+                <!-- Scene 2: AI Investigation Pipeline -->
+                <div class="scene" id="scene2">
+                    <div class="pipeline-container">
+                        <div class="pipeline-title" id="pipelineStateTitle">Launching WhistleBlower Investigation...</div>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); text-align: center; max-width: 500px; margin-bottom: 1rem;">
+                            Orchestrator activating cognitive sub-agents to trace the authentication lineage, verify verification flags, and calculate abuse vectors.
+                        </p>
+                        <div class="pipeline-grid" id="pipelineGrid">
+                            <!-- JS will inject and animate the steps -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scene 3: Connected Apps Graph -->
+                <div class="scene" id="scene3">
+                    <div class="graph-wrapper">
+                        <svg class="network-svg" id="networkGraphSvg">
+                            <defs>
+                                <filter id="glow-cyan-filter" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="6" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                                <filter id="glow-red-filter" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="8" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                            </defs>
+                            <!-- Links dynamic -->
+                            <g id="linksGroup"></g>
+                            <!-- Nodes dynamic -->
+                            <g id="nodesGroup"></g>
+                        </svg>
+                        
+                        <!-- Graph HTML Tooltip -->
+                        <div class="graph-tooltip" id="graphTooltip"></div>
+                    </div>
+                </div>
+
+                <!-- Scene 6: Human Approval Dialog -->
+                <div class="scene" id="scene6">
+                    <div class="glass-card approval-card">
+                        <div class="panel-header">
+                            <span class="panel-title" style="color:var(--danger-red); font-weight:800;" id="approvalCardTitle">AI Recommendation</span>
+                            <span class="risk-score-badge" id="approvalCardBadge">HIGH RISK</span>
+                        </div>
+                        <div class="approval-meta">
+                            <div class="approval-app-icon" id="approvalAppIcon">PDF</div>
+                            <div>
+                                <h3 style="font-size: 1rem; color: var(--text-primary);" id="approvalAppName">Old PDF Converter</h3>
+                                <p style="font-size: 0.75rem; color: var(--text-secondary);" id="approvalAppSub">Remove Access</p>
+                            </div>
+                        </div>
+                        <div class="risk-reasoning-list" id="approvalReasonsList" style="margin-bottom: 1rem;">
+                            <div class="risk-reasoning-item">
+                                <span class="risk-reasoning-bullet">▪</span>
+                                <span><strong>Reason:</strong> Unused Application</span>
+                            </div>
+                            <div class="risk-reasoning-item">
+                                <span class="risk-reasoning-bullet">▪</span>
+                                <span><strong>Reason:</strong> Sensitive OAuth Permissions</span>
+                            </div>
+                            <div class="risk-reasoning-item">
+                                <span class="risk-reasoning-bullet">▪</span>
+                                <span><strong>Reason:</strong> Developer Unverified</span>
+                            </div>
+                            <div class="risk-reasoning-item">
+                                <span class="risk-reasoning-bullet">▪</span>
+                                <span><strong>Risk Level:</strong> HIGH</span>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" id="approveRevocationBtn">Approve</button>
+                            <button class="btn btn-secondary" id="rejectRevocationBtn">Reject</button>
+                            <button class="btn btn-outline" id="approveAllBtn">Approve All Safe Recommendations</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scene 7: Cleanup Animation Screen -->
+                <div class="scene" id="scene7">
+                    <div class="success-checkmark">✓</div>
+                    <h2 style="font-size:1.75rem; font-weight:800; color:var(--success-green); margin-bottom:0.5rem;">REVOCATION COMPLETED</h2>
+                    <p style="color:var(--text-secondary); text-align:center; max-width:400px; font-size:0.9rem; line-height:1.5; margin-bottom:1rem;" id="cleanupDescText">
+                        Authentication credentials scrubbed. Revocation payload delivered via OAuth gateway. Graph nodes disconnected.
+                    </p>
+                    <div class="status-badge" style="border-color: rgba(52, 199, 89, 0.2); background: rgba(52, 199, 89, 0.05); padding: 0.5rem 1rem;">
+                        <span class="status-badge-title" style="color: var(--success-green);">Attack Surface Reduced</span>
+                        <span class="status-badge-value" style="color: var(--success-green); font-size: 1.5rem;" id="surfaceReductionVal">68%</span>
+                    </div>
+                </div>
+
+                <!-- Scene 8: Before vs After Split screen -->
+                <div class="scene" id="scene8">
+                    <div class="comparison-container">
+                        <div class="glass-card comp-card before">
+                            <h3 class="comp-title">Before Cleanup</h3>
+                            <div class="comp-metrics">
+                                <div class="comp-row">
+                                    <span class="comp-row-label">Security Score</span>
+                                    <span class="comp-row-val" id="beforeScore">42</span>
+                                </div>
+                                <div class="comp-row">
+                                    <span class="comp-row-label">Connected Apps</span>
+                                    <span class="comp-row-val" id="beforeApps">38</span>
+                                </div>
+                                <div class="comp-row">
+                                    <span class="comp-row-label">Sensitive Permissions</span>
+                                    <span class="comp-row-val" id="beforePermissions">64</span>
+                                </div>
+                                <div class="comp-row">
+                                    <span class="comp-row-label">Attack Surface</span>
+                                    <span class="comp-row-val" id="beforeSurface">HIGH</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card comp-card after">
+                            <h3 class="comp-title">After Cleanup</h3>
+                            <div class="comp-metrics">
+                                <div class="comp-row">
+                                    <span class="comp-row-label">Security Score</span>
+                                    <span class="comp-row-val" id="afterScore">91</span>
+                                </div>
+                                <div class="comp-row">
+                                    <span class="comp-row-label">Connected Apps</span>
+                                    <span class="comp-row-val" id="afterApps">27</span>
+                                </div>
+                                <div class="comp-row">
+                                    <span class="comp-row-label">Sensitive Permissions</span>
+                                    <span class="comp-row-val" id="afterPermissions">29</span>
+                                </div>
+                                <div class="comp-row">
+                                    <span class="comp-row-label">Attack Surface</span>
+                                    <span class="comp-row-val" id="afterSurface">LOW</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scene 9: Executive Security Report -->
+                <div class="scene" id="scene9">
+                    <div class="glass-card report-card" style="position: relative;">
+                        <div class="report-header">
+                            <div>
+                                <h3 style="font-size: 1.15rem; font-weight:800; color:var(--text-primary);" id="reportHeaderTitle">WhistleBlower Digital Hygiene Report</h3>
+                                <p style="font-size: 0.75rem; color:var(--text-secondary);">Enterprise Security Operations Audit Summary</p>
+                            </div>
+                            <div class="report-badge" id="reportBadgeGrade">A</div>
+                        </div>
+                        <div class="report-grid">
+                            <div class="report-item">
+                                <span class="report-label">Apps Removed</span>
+                                <span class="report-value" id="reportAppsRemoved">11</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">Permissions Revoked</span>
+                                <span class="report-value" id="reportPermsRevoked">36</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">Risk Reduction</span>
+                                <span class="report-value" id="reportRiskReduction">68%</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">Inactive Apps Removed</span>
+                                <span class="report-value" id="reportInactiveRemoved">9</span>
+                            </div>
+                            <div class="report-item" style="grid-column: span 2">
+                                <span class="report-label">Potential Data Exposure Reduced</span>
+                                <span class="report-value" id="reportExposureReduced">72%</span>
+                            </div>
+                        </div>
+                        <div class="report-recommendations">
+                            <p class="report-rec-title">Recommendations:</p>
+                            <div class="report-rec-item">
+                                <span class="report-rec-check">✓</span> <span>Enable Multi-Factor Authentication</span>
+                            </div>
+                            <div class="report-rec-item">
+                                <span class="report-rec-check">✓</span> <span>Review OAuth Permissions Monthly</span>
+                            </div>
+                            <div class="report-rec-item">
+                                <span class="report-rec-check">✓</span> <span>Remove Legacy Browser Extensions</span>
+                            </div>
+                            <div class="report-rec-item">
+                                <span class="report-rec-check">✓</span> <span>Schedule Automatic Weekly Security Scans</span>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="simulateReportDownload()">Download PDF</button>
+                            <button class="btn btn-secondary">Share Report</button>
+                            <button class="btn btn-secondary">Email Report</button>
+                        </div>
+
+                        <!-- Downloader simulated overlay -->
+                        <div class="report-download-anim" id="downloadAnim">
+                            <div style="width: 40px; height: 40px; border: 4px solid var(--accent-cyan); border-top-color: transparent; border-radius: 50%; animation: pulse-green 1s linear infinite;"></div>
+                            <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-cyan);">Generating encrypted PDF payload...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scene 10: Final Dashboard Screen -->
+                <div class="scene" id="scene10">
+                    <h2 style="font-size: 1.5rem; font-weight:800; color:var(--text-primary); margin-bottom: 1.5rem; letter-spacing: -0.01em;">SECURITY OPERATIONS POSTURE</h2>
+                    <div class="final-dashboard-grid">
+                        <div class="glass-card final-card success">
+                            <span class="metric-title">Threat Level</span>
+                            <span class="metric-value" id="finalMetricThreat" style="color: var(--success-green); font-size: 1.5rem;">LOW</span>
+                        </div>
+                        <div class="glass-card final-card">
+                            <span class="metric-title">Security Score</span>
+                            <span class="metric-value" id="finalMetricScore" style="color: var(--accent-cyan); font-size: 1.5rem;">91</span>
+                        </div>
+                        <div class="glass-card final-card success">
+                            <span class="metric-title">Attack Surface</span>
+                            <span class="metric-value" id="finalMetricSurface" style="color: var(--success-green); font-size: 1.25rem;">Reduced By 68%</span>
+                        </div>
+                        <div class="glass-card final-card">
+                            <span class="metric-title">AI Confidence</span>
+                            <span class="metric-value" style="color: var(--accent-cyan); font-family:var(--font-mono); font-size: 1.5rem;">97%</span>
+                        </div>
+                        <div class="glass-card final-card">
+                            <span class="metric-title">Protected Applications</span>
+                            <span class="metric-value" id="finalMetricApps" style="color: var(--text-primary); font-size: 1.5rem;">27</span>
+                        </div>
+                        <div class="glass-card final-card">
+                            <span class="metric-title">Next Scheduled Scan</span>
+                            <span class="metric-value" style="font-size: 1.2rem; margin-top:0.4rem; color: var(--text-secondary);">Tomorrow</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" style="margin-top: 2rem;" onclick="resetWorkflowAction()">Reset All State & Restart</button>
+                </div>
+
+            </div>
+
+            <!-- Right Panel (AI Context & Info Panel) -->
+            <div class="side-panel">
+                
+                <!-- Security Score Tracker Card -->
+                <div class="glass-card" style="padding: 1.25rem;">
+                    <h3 style="font-size: 0.9rem; font-weight:700; color:var(--text-secondary); margin-bottom: 0.75rem; text-transform:uppercase; letter-spacing:0.03em;">DASHBOARD CONTEXT</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.85rem; color:var(--text-secondary);">Risk Level:</span>
+                            <span style="font-size:0.9rem; font-weight:800; font-family:var(--font-mono);" id="contextRiskLabel">HIGH</span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                            <div style="height:100%; width: 58%; background: var(--danger-red); transition: all 0.5s ease;" id="contextRiskBar"></div>
+                        </div>
+                        <p style="font-size: 0.75rem; color:var(--text-secondary); line-height: 1.4;" id="contextDesc">
+                            Threat alerts active. Sub-agents are auditing 38 connected third-party platforms.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Live Agent Status Panel -->
+                <div class="glass-card" id="agentStatusCard" style="padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <h3 style="font-size: 0.9rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.03em;">LIVE AGENT STATUS</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.85rem;" id="agentStatusList">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Contextual Dynamic Widget Area (changes based on active scene) -->
+                <div class="glass-card" style="flex: 1; display:flex; flex-direction:column;">
+                    <div id="sideWidgetDefault" class="risk-analysis-panel">
+                        <div class="panel-header">
+                            <span class="panel-title" id="sideWidgetTitle">AI COGNITIVE FEED</span>
+                            <span class="risk-score-badge" id="sideWidgetBadge" style="background:rgba(0, 240, 255, 0.1); border-color:var(--accent-cyan); color:var(--accent-cyan)">ACTIVE</span>
+                        </div>
+                        
+                        <!-- Scene 4 / App details inside side panel -->
+                        <div id="appRiskDetailContent" style="display:none; flex-direction:column; gap:0.75rem;">
+                            <h4 style="font-size: 0.95rem; font-weight:700; color:var(--text-primary);">AI Risk Analysis</h4>
+                            <div class="risk-stat-grid">
+                                <div class="risk-stat-item">
+                                    <span class="risk-stat-label">Risk Score</span>
+                                    <span class="risk-stat-value high" id="sideAppRiskScore">92 / 100</span>
+                                </div>
+                                <div class="risk-stat-item">
+                                    <span class="risk-stat-label">AI Confidence</span>
+                                    <span class="risk-stat-value" id="sideAppConfidence">97%</span>
+                                </div>
+                            </div>
+                            <div class="risk-reasoning-list">
+                                <p style="font-weight: 700; font-size:0.8rem; color:var(--text-primary);">Reasoning:</p>
+                                <div class="risk-reasoning-list" id="sideAppReasoningList">
+                                    <!-- Dynamic items -->
+                                </div>
+                            </div>
+                            <div class="risk-stat-grid" style="margin-top: 0.5rem;">
+                                <div class="risk-stat-item">
+                                    <span class="risk-stat-label">Likelihood Of Abuse</span>
+                                    <span class="risk-stat-value high" id="sideAppAbuse" style="font-weight:800;">HIGH</span>
+                                </div>
+                                <div class="risk-stat-item">
+                                    <span class="risk-stat-label">Recommended Action</span>
+                                    <span class="risk-stat-value" id="sideAppRecAction" style="color:var(--danger-red); font-weight:800;">REVOKE ACCESS</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Discussion Content -->
+                        <div id="chatDiscussionContainer" style="display:none; flex-direction:column; flex:1; justify-content:space-between;">
+                            <div class="discussion-container" id="discussionChatBox">
+                                <!-- Dynamic bubbles -->
+                            </div>
+                            <div style="border-top:1px solid var(--card-border); padding-top:0.5rem; font-family:var(--font-mono); font-size:0.7rem; color:var(--accent-cyan); display:flex; align-items:center; gap:0.5rem;">
+                                <div class="status-dot" style="background:var(--accent-cyan)"></div>
+                                <span id="debateStatusText">Agents analyzing security vectors...</span>
+                            </div>
+                        </div>
+
+                        <!-- Default feed text -->
+                        <div id="sideWidgetDefaultText" style="font-size:0.85rem; color:var(--text-secondary); line-height: 1.5; display:flex; flex-direction:column; gap:0.75rem;">
+                            <p>Select any node in the interactive network graph to load its real-time permissions audit payload and security rating.</p>
+                            <p>Use the Story console below to step through a live OAuth hijacking mitigation workflow.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Live Security Metrics Strip (Scene 0 to 7) -->
+        <div class="metrics-grid" id="metricsStrip">
+            <div class="glass-card metric-card" id="metricCardScore">
+                <span class="metric-title">Security Score</span>
+                <span class="metric-value" id="valScore">0</span>
+            </div>
+            <div class="glass-card metric-card" id="metricCardApps">
+                <span class="metric-title">Connected Apps</span>
+                <span class="metric-value" id="valApps">0</span>
+            </div>
+            <div class="glass-card metric-card warning">
+                <span class="metric-title">Sensitive Permissions</span>
+                <span class="metric-value" id="valPermissions">0</span>
+            </div>
+            <div class="glass-card metric-card warning">
+                <span class="metric-title">Inactive Apps</span>
+                <span class="metric-value" id="valInactive">0</span>
+            </div>
+            <div class="glass-card metric-card danger" id="metricCardThreats">
+                <span class="metric-title">Potential Threats</span>
+                <span class="metric-value" id="valThreats">0</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Presentation Storyboard docked Console -->
+    <div class="demo-console">
+        <div class="console-top">
+            <div class="console-title">
+                <div class="status-dot" style="background: var(--accent-cyan)"></div>
+                <span id="consoleOperationsTitle">DEMO OPERATIONS SYSTEM -- STORY MODE</span>
+            </div>
+            <div class="console-dots">
+                <div class="console-dot"></div>
+                <div class="console-dot"></div>
+                <div class="console-dot"></div>
+            </div>
+        </div>
+        <div class="console-controls">
+            <div class="scene-indicator">
+                <span class="scene-indicator-num" id="sceneIndicatorNum">00</span>
+                <span id="sceneIndicatorName">Dashboard Landing</span>
+            </div>
+            <div class="control-btns">
+                <button class="console-btn" id="prevBtn" onclick="demoControl.prevScene()">&lt; PREV SCENE</button>
+                <button class="console-btn" id="playBtn" onclick="demoControl.togglePlay()">PLAY STORY</button>
+                <button class="console-btn" id="nextBtn" onclick="demoControl.nextScene()">NEXT SCENE &gt;</button>
+                <button class="console-btn" onclick="resetWorkflowAction()">RESET</button>
+            </div>
+        </div>
+        <div class="scene-dots-container" id="dotsContainer">
+            <!-- Stepper indicators dynamic -->
+        </div>
+    </div>
+
+    <script>
+        // Global mode state: 'story' or 'live'
+        let dashboardMode = 'story';
+
+        // Static App Database for Story mode
+        const STORY_APPS_DB = [
+            { id: "slack", name: "Slack", dev: "Slack Technologies", lastUsed: "1 day ago", risk: "safe", riskNum: 15, permissions: ["auth/userinfo.profile", "auth/userinfo.email"] },
+            { id: "dropbox", name: "Dropbox", dev: "Dropbox Inc.", lastUsed: "12 days ago", risk: "safe", riskNum: 25, permissions: ["auth/drive.file"] },
+            { id: "canva", name: "Canva", dev: "Canva Pty Ltd", lastUsed: "5 days ago", risk: "safe", riskNum: 20, permissions: ["auth/userinfo.profile"] },
+            { id: "github", name: "GitHub Integration", dev: "GitHub Inc.", lastUsed: "2 hours ago", risk: "safe", riskNum: 18, permissions: ["auth/userinfo.profile"] },
+            { id: "zoom", name: "Zoom", dev: "Zoom Video Comm.", lastUsed: "3 days ago", risk: "safe", riskNum: 22, permissions: ["auth/userinfo.profile"] },
+            { id: "notion", name: "Notion", dev: "Notion Labs", lastUsed: "4 hours ago", risk: "medium", riskNum: 48, permissions: ["auth/calendar.events"] },
+            { id: "extensions", name: "Chrome Extensions", dev: "Various", lastUsed: "15 days ago", risk: "medium", riskNum: 55, permissions: ["auth/drive.readonly"] },
+            { id: "pdf_conv", name: "PDF Converter", dev: "Unverified Developer", lastUsed: "817 days ago", risk: "high", riskNum: 92, permissions: ["auth/gmail.readonly", "auth/drive", "auth/contacts.readonly"] },
+            { id: "ai_writing", name: "AI Writing Tool", dev: "Unknown Developer", lastUsed: "310 days ago", risk: "medium", riskNum: 60, permissions: ["auth/userinfo.profile", "auth/drive.readonly"] },
+            { id: "cal_bot", name: "Calendar Bot", dev: "Unknown Developer", lastUsed: "180 days ago", risk: "medium", riskNum: 52, permissions: ["auth/calendar.events"] }
+        ];
+
+        // System Agent pipeline nodes
+        const PIPELINE_STEPS = [
+            { id: "discovery", name: "OAuth Discovery Agent", task: "Scanning OAuth registry..." },
+            { id: "collection", name: "Permission Collection Agent", task: "Retrieving authorization scopes..." },
+            { id: "risk", name: "Risk Analysis Agent", task: "Analyzing OAuth permissions..." },
+            { id: "reasoning", name: "Reasoning Agent", task: "Determining operational patterns..." },
+            { id: "planning", name: "Planning Agent", task: "Formulating permission isolation path..." },
+            { id: "human", name: "Human Approval Agent", task: "Suspending for validation..." },
+            { id: "execution", name: "Execution Agent", task: "Delivering revocation tokens..." },
+            { id: "logger", name: "Audit Logger", task: "Committing session payload..." }
+        ];
+
+        // Chat Script for Story mode Scene 5
+        const STORY_CHAT_SCRIPT = [
+            { sender: "risk_agent", text: "This application haven't been used in over two years." },
+            { sender: "permission_agent", text: "It still retains access to Gmail, Drive, and Contacts." },
+            { sender: "planning_agent", text: "Revoking this application reduces the user's attack surface by approximately 14%." },
+            { sender: "security_agent", text: "No business dependency detected." },
+            { sender: "approval_agent", text: "Human confirmation required before execution." }
+        ];
+
+        // Scene Definitions
+        const SCENES = [
+            { num: "00", name: "Dashboard Landing", key: "landing" },
+            { num: "01", name: "Security Incident Alert", key: "incident" },
+            { num: "02", name: "AI Agent Triage Pipeline", key: "pipeline" },
+            { num: "03", name: "Interactive Permissions Graph", key: "graph" },
+            { num: "04", name: "AI Risk Analysis", key: "risk_details" },
+            { num: "05", name: "Multi-Agent Discussion", key: "discussion" },
+            { num: "06", name: "Human Confirmation Gate", key: "approval" },
+            { num: "07", name: "Revocation & Cleanup Action", key: "cleanup" },
+            { num: "08", name: "Before vs After Security Posture", key: "before_after" },
+            { num: "09", name: "Executive Hygiene Report", key: "report" },
+            { num: "10", name: "Final Dashboard State", key: "final_state" }
+        ];
+
+        class DemoControl {
+            constructor() {
+                this.currentSceneIdx = 0;
+                this.isPlaying = false;
+                this.timer = null;
+                this.nodeDestroyed = false;
+
+                // Live backend state variables
+                this.liveApps = [];
+                this.liveAuditLogs = [];
+                this.liveSessionId = null;
+                this.liveUserId = "demo_user_" + Math.random().toString(36).substring(2, 7);
+                this.activeLiveRevocations = [];
+                this.activeReader = null;
+                
+                this.agentStatuses = {
+                    discovery: { name: "OAuth Discovery Agent", state: "waiting", detail: "Waiting" },
+                    collection: { name: "Permission Collection Agent", state: "waiting", detail: "Waiting" },
+                    risk: { name: "Risk Analysis Agent", state: "waiting", detail: "Waiting" },
+                    reasoning: { name: "Reasoning Agent", state: "waiting", detail: "Waiting" },
+                    planning: { name: "Planning Agent", state: "waiting", detail: "Waiting" },
+                    human: { name: "Human Approval Agent", state: "waiting", detail: "Waiting" },
+                    execution: { name: "Execution Agent", state: "waiting", detail: "Waiting" },
+                    logger: { name: "Audit Logger", state: "waiting", detail: "Waiting" }
+                };
+
+                this.initDots();
+                this.renderPipeline();
+                this.renderLiveAgentStatus();
+                this.initializeDatabase();
+            }
+
+            async initializeDatabase() {
+                if (dashboardMode === 'live') {
+                    await this.loadLiveBackendData();
+                } else {
+                    this.nodeDestroyed = false;
+                    this.renderGraph();
+                    this.runMetricsEntryAnimation();
+                }
+            }
+
+            async loadLiveBackendData() {
+                try {
+                    const response = await fetch('/api/apps');
+                    const data = await response.json();
+                    this.liveApps = data.apps || [];
+                    
+                    // Update graph and stats
+                    this.renderGraph();
+                    this.updateLiveStats();
+                    
+                    // Load audit logs
+                    const logResponse = await fetch('/api/audit-log');
+                    this.liveAuditLogs = await logResponse.json();
+                } catch (e) {
+                    console.error("Failed to connect to WhistleBlower backend API. Falling back to Story mode.", e);
+                    setMode('story');
+                }
+            }
+
+            updateLiveStats() {
+                const totalApps = this.liveApps.length;
+                let sensitiveCount = 0;
+                let inactiveCount = 0;
+                let threatCount = 0;
+                let riskSum = 0;
+
+                this.liveApps.forEach(app => {
+                    // Check sensitive scopes
+                    const isSensitive = app.scopes.some(s => s.includes("gmail") || s.includes("drive") || s.includes("contacts"));
+                    if (isSensitive) sensitiveCount += app.scopes.length;
+
+                    // Check inactive
+                    if (app.days_since_last_used > 90) inactiveCount++;
+
+                    // Custom local risk assessment
+                    const local = this.calculateLocalRisk(app);
+                    if (local.risk === "high") threatCount++;
+                    riskSum += local.riskNum;
+                });
+
+                // Real calculated security score
+                const avgRisk = totalApps > 0 ? (riskSum / totalApps) : 0;
+                const score = Math.round(100 - avgRisk);
+
+                // Set HTML metrics
+                this.animateCounter("valScore", parseInt(document.getElementById("valScore").innerText) || 0, score, 800);
+                this.animateCounter("valApps", parseInt(document.getElementById("valApps").innerText) || 0, totalApps, 800);
+                this.animateCounter("valPermissions", parseInt(document.getElementById("valPermissions").innerText) || 0, sensitiveCount, 800);
+                this.animateCounter("valInactive", parseInt(document.getElementById("valInactive").innerText) || 0, inactiveCount, 800);
+                this.animateCounter("valThreats", parseInt(document.getElementById("valThreats").innerText) || 0, threatCount, 800);
+            }
+
+            calculateLocalRisk(app) {
+                let risk = "safe";
+                let riskNum = 10;
+                const hasSensitive = app.scopes.some(s => s.includes("gmail") || s.includes("drive") || s.includes("contacts"));
+                
+                if (!app.verified && hasSensitive) {
+                    risk = "high";
+                    riskNum = 92;
+                } else if (app.days_since_last_used > 100 || hasSensitive) {
+                    risk = "medium";
+                    riskNum = 55;
+                }
+                return { risk, riskNum };
+            }
+
+            initDots() {
+                const container = document.getElementById("dotsContainer");
+                container.innerHTML = "";
+                SCENES.forEach((scene, index) => {
+                    const btn = document.createElement("button");
+                    btn.className = `scene-dot-btn ${index === 0 ? 'active' : ''}`;
+                    btn.title = scene.name;
+                    btn.onclick = () => this.gotoScene(index);
+                    container.appendChild(btn);
+                });
+            }
+
+            gotoScene(index) {
+                if (index < 0 || index >= SCENES.length) return;
+                this.currentSceneIdx = index;
+                this.updateUI();
+                
+                if (this.isPlaying) {
+                    this.resetPlayTimer();
+                }
+            }
+
+            prevScene() {
+                if (this.currentSceneIdx > 0) {
+                    this.gotoScene(this.currentSceneIdx - 1);
+                }
+            }
+
+            nextScene() {
+                if (this.currentSceneIdx < SCENES.length - 1) {
+                    this.gotoScene(this.currentSceneIdx + 1);
+                } else {
+                    this.isPlaying = false;
+                    document.getElementById("playBtn").innerText = "PLAY STORY";
+                }
+            }
+
+            togglePlay() {
+                this.isPlaying = !this.isPlaying;
+                const playBtn = document.getElementById("playBtn");
+                if (this.isPlaying) {
+                    playBtn.innerText = "PAUSE";
+                    this.resetPlayTimer();
+                } else {
+                    playBtn.innerText = "PLAY STORY";
+                    if (this.timer) clearTimeout(this.timer);
+                }
+            }
+
+            resetPlayTimer() {
+                if (this.timer) clearTimeout(this.timer);
+                
+                let delay = 5000;
+                if (this.currentSceneIdx === 1) delay = 6000; 
+                if (this.currentSceneIdx === 2) delay = 10000; 
+                if (this.currentSceneIdx === 5) delay = 9000; 
+                if (this.currentSceneIdx === 6) delay = 10000; 
+                
+                this.timer = setTimeout(() => {
+                    this.nextScene();
+                }, delay);
+            }
+
+            resetDemo() {
+                this.nodeDestroyed = false;
+                this.currentSceneIdx = 0;
+                this.isPlaying = false;
+                if (this.timer) clearTimeout(this.timer);
+                document.getElementById("playBtn").innerText = "PLAY STORY";
+                
+                this.resetAgentStatuses();
+                this.initializeDatabase();
+            }
+
+            resetAgentStatuses() {
+                Object.keys(this.agentStatuses).forEach(k => {
+                    this.agentStatuses[k].state = "waiting";
+                    this.agentStatuses[k].detail = "Waiting";
+                });
+                this.renderLiveAgentStatus();
+            }
+
+            runMetricsEntryAnimation() {
+                this.animateCounter("valScore", 0, 42, 1200);
+                this.animateCounter("valApps", 0, 38, 1200);
+                this.animateCounter("valPermissions", 0, 64, 1200);
+                this.animateCounter("valInactive", 0, 15, 1200);
+                this.animateCounter("valThreats", 0, 5, 1200);
+            }
+
+            updateUI() {
+                // Update active scene
+                document.querySelectorAll(".scene").forEach(el => el.classList.remove("active"));
+                
+                const activeSceneKey = SCENES[this.currentSceneIdx].key;
+                
+                const alertGlow = document.getElementById("redAlertGlow");
+                if (this.currentSceneIdx === 1) {
+                    alertGlow.classList.add("active");
+                } else if (this.currentSceneIdx >= 7 || this.currentSceneIdx === 0) {
+                    alertGlow.classList.remove("active");
+                }
+
+                // Scene switching
+                if (activeSceneKey === "landing") {
+                    document.getElementById("scene0").classList.add("active");
+                } else if (activeSceneKey === "incident") {
+                    document.getElementById("scene1").classList.add("active");
+                    
+                    // Only trigger auto-skip transition overlay in Story mode
+                    if (dashboardMode === 'story') {
+                        setTimeout(() => {
+                            if (this.currentSceneIdx === 1) {
+                                const overlay = document.getElementById("questionOverlay");
+                                overlay.style.opacity = 1;
+                                setTimeout(() => {
+                                    if (this.currentSceneIdx === 1) {
+                                        overlay.style.opacity = 0;
+                                        this.nextScene();
+                                    }
+                                }, 2000);
+                            }
+                        }, 4000);
+                    }
+                } else if (activeSceneKey === "pipeline") {
+                    document.getElementById("scene2").classList.add("active");
+                    if (dashboardMode === 'story') {
+                        this.runPipelineAnimation();
+                    }
+                } else if (activeSceneKey === "graph" || activeSceneKey === "risk_details") {
+                    document.getElementById("scene3").classList.add("active");
+                } else if (activeSceneKey === "discussion") {
+                    document.getElementById("scene3").classList.add("active");
+                    if (dashboardMode === 'story') {
+                        this.runDiscussionAnimation();
+                    }
+                } else if (activeSceneKey === "approval") {
+                    document.getElementById("scene6").classList.add("active");
+                } else if (activeSceneKey === "cleanup") {
+                    document.getElementById("scene7").classList.add("active");
+                    if (dashboardMode === 'story') {
+                        this.runCleanupAnimation();
+                    }
+                } else if (activeSceneKey === "before_after") {
+                    document.getElementById("scene8").classList.add("active");
+                    this.runScoreCounter();
+                } else if (activeSceneKey === "report") {
+                    document.getElementById("scene9").classList.add("active");
+                } else if (activeSceneKey === "final_state") {
+                    document.getElementById("scene10").classList.add("active");
+                }
+
+                // Update console indicators
+                document.getElementById("sceneIndicatorNum").innerText = SCENES[this.currentSceneIdx].num;
+                document.getElementById("sceneIndicatorName").innerText = SCENES[this.currentSceneIdx].name;
+                
+                document.getElementById("prevBtn").disabled = this.currentSceneIdx === 0;
+                document.getElementById("nextBtn").disabled = this.currentSceneIdx === SCENES.length - 1;
+
+                document.querySelectorAll(".scene-dot-btn").forEach((dot, index) => {
+                    if (index === this.currentSceneIdx) {
+                        dot.classList.add("active");
+                    } else {
+                        dot.classList.remove("active");
+                    }
+                });
+
+                this.updateSidePanel();
+
+                const metricsStrip = document.getElementById("metricsStrip");
+                if (this.currentSceneIdx >= 8) {
+                    metricsStrip.style.opacity = "0.5";
+                } else {
+                    metricsStrip.style.opacity = "1";
+                }
+            }
+
+            updateSidePanel() {
+                const title = document.getElementById("sideWidgetTitle");
+                const badge = document.getElementById("sideWidgetBadge");
+                const defaultText = document.getElementById("sideWidgetDefaultText");
+                const riskDetails = document.getElementById("appRiskDetailContent");
+                const chatContainer = document.getElementById("chatDiscussionContainer");
+                
+                const label = document.getElementById("contextRiskLabel");
+                const bar = document.getElementById("contextRiskBar");
+                const desc = document.getElementById("contextDesc");
+
+                riskDetails.style.display = "none";
+                chatContainer.style.display = "none";
+                defaultText.style.display = "block";
+
+                if (this.currentSceneIdx === 0) {
+                    label.innerText = "SAFE";
+                    label.style.color = "var(--success-green)";
+                    bar.style.width = "10%";
+                    bar.style.background = "var(--success-green)";
+                    desc.innerText = "Systems operational. Active connected accounts audited successfully.";
+                    
+                    title.innerText = "COGNITIVE FEED";
+                    badge.innerText = "STANDBY";
+                    badge.style.borderColor = "var(--accent-cyan)";
+                    badge.style.color = "var(--accent-cyan)";
+                    badge.style.background = "rgba(0,240,255,0.05)";
+                } else if (this.currentSceneIdx === 1) {
+                    label.innerText = "CRITICAL";
+                    label.style.color = "var(--danger-red)";
+                    bar.style.width = "95%";
+                    bar.style.background = "var(--danger-red)";
+                    desc.innerText = "Incident response active. Suspicious API token exchange pattern from legacy app.";
+                    
+                    title.innerText = "INCIDENT FEED";
+                    badge.innerText = "TRIAGE";
+                    badge.style.borderColor = "var(--danger-red)";
+                    badge.style.color = "var(--danger-red)";
+                    badge.style.background = "rgba(255,59,48,0.1)";
+                } else if (this.currentSceneIdx === 2) {
+                    label.innerText = "CRITICAL";
+                    label.style.color = "var(--danger-red)";
+                    bar.style.width = "85%";
+                    bar.style.background = "var(--danger-red)";
+                    desc.innerText = "Multi-agent graph traversal initiated. Assessing exposure vector.";
+                    
+                    title.innerText = "AGENT FEED";
+                    badge.innerText = "INVESTIGATING";
+                } else if (this.currentSceneIdx === 3 || this.currentSceneIdx === 4) {
+                    label.innerText = "CRITICAL";
+                    label.style.color = "var(--danger-red)";
+                    bar.style.width = "92%";
+                    bar.style.background = "var(--danger-red)";
+                    desc.innerText = "Click on the red node 'PDF Converter' in the permission web graph to load reasoning diagnostics.";
+                    
+                    if (this.currentSceneIdx === 4) {
+                        title.innerText = "AI RISK ANALYSIS";
+                        badge.innerText = "HIGH RISK";
+                        badge.style.borderColor = "var(--danger-red)";
+                        badge.style.color = "var(--danger-red)";
+                        badge.style.background = "rgba(255,59,48,0.05)";
+                        
+                        defaultText.style.display = "none";
+                        riskDetails.style.display = "flex";
+                    }
+                } else if (this.currentSceneIdx === 5) {
+                    label.innerText = "CRITICAL";
+                    label.style.color = "var(--danger-red)";
+                    bar.style.width = "92%";
+                    bar.style.background = "var(--danger-red)";
+                    desc.innerText = "Orchestrating agent collaboration consensus. Human confirmation gate locked.";
+                    
+                    title.innerText = "AGENT DEBATE";
+                    badge.innerText = "DISCUSSING";
+                    badge.style.borderColor = "var(--accent-cyan)";
+                    badge.style.color = "var(--accent-cyan)";
+                    
+                    defaultText.style.display = "none";
+                    chatContainer.style.display = "flex";
+                } else if (this.currentSceneIdx === 6) {
+                    label.innerText = "CRITICAL";
+                    label.style.color = "var(--danger-red)";
+                    desc.innerText = "Approve recommended revocation in the action card to safely delete the OAuth tokens.";
+                } else if (this.currentSceneIdx === 7) {
+                    label.innerText = "RESOLVED";
+                    label.style.color = "var(--success-green)";
+                    bar.style.width = "22%";
+                    bar.style.background = "var(--success-green)";
+                    desc.innerText = "Attack surface reduced. Connected threat nodes purged.";
+                } else if (this.currentSceneIdx >= 8) {
+                    label.innerText = "SECURE";
+                    label.style.color = "var(--success-green)";
+                    bar.style.width = "9%";
+                    bar.style.background = "var(--success-green)";
+                    desc.innerText = "Digital hygiene is fully restored. Next scheduled audit in 24 hours.";
+                    
+                    title.innerText = "HYGIENE COMPLETED";
+                    badge.innerText = "SECURE";
+                    badge.style.borderColor = "var(--success-green)";
+                    badge.style.color = "var(--success-green)";
+                }
+            }
+
+            renderPipeline() {
+                const grid = document.getElementById("pipelineGrid");
+                grid.innerHTML = "";
+                PIPELINE_STEPS.forEach((step) => {
+                    const card = document.createElement("div");
+                    card.className = "pipeline-step";
+                    card.id = `pipeline-${step.id}`;
+                    card.innerHTML = `
+                        <svg class="pipeline-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                        </svg>
+                        <span class="pipeline-name">${step.name}</span>
+                        <span class="pipeline-task" id="pipeline-task-${step.id}">${step.task}</span>
+                        <div class="pipeline-progress-bar">
+                            <div class="pipeline-progress-fill" id="fill-${step.id}"></div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            renderLiveAgentStatus() {
+                const list = document.getElementById("agentStatusList");
+                if (!list) return;
+                list.innerHTML = "";
+                Object.keys(this.agentStatuses).forEach(key => {
+                    const agent = this.agentStatuses[key];
+                    let statusHtml = "";
+                    if (agent.state === "completed") {
+                        statusHtml = `<span style="color: var(--success-green); font-weight:700">Completed</span>`;
+                    } else if (agent.state === "running") {
+                        statusHtml = `<span style="color: var(--warning-orange); animation: text-blink 1.5s infinite; font-weight:700">Running...</span>`;
+                    } else {
+                        statusHtml = `<span style="color: var(--text-secondary)">Waiting</span>`;
+                    }
+                    
+                    let detailHtml = "";
+                    if (agent.detail && agent.state === "running") {
+                        detailHtml = `<div style="font-size: 0.75rem; color: var(--accent-cyan); margin-left: 0.25rem; font-family: var(--font-mono);">${agent.detail}</div>`;
+                    }
+                    
+                    const div = document.createElement("div");
+                    div.style.display = "flex";
+                    div.style.flexDirection = "column";
+                    div.style.gap = "0.15rem";
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 600; color: ${agent.state === 'running' ? 'var(--text-primary)' : 'var(--text-secondary)'}">${agent.name}</span>
+                            ${statusHtml}
+                        </div>
+                        ${detailHtml}
+                    `;
+                    list.appendChild(div);
+                });
+            }
+
+            async runPipelineAnimation() {
+                this.renderPipeline();
+                for (let i = 0; i < PIPELINE_STEPS.length; i++) {
+                    if (this.currentSceneIdx !== 2) break;
+                    
+                    const step = PIPELINE_STEPS[i];
+                    const card = document.getElementById(`pipeline-${step.id}`);
+                    const fill = document.getElementById(`fill-${step.id}`);
+                    
+                    card.classList.add("active");
+                    let progress = 0;
+                    while (progress <= 100) {
+                        if (this.currentSceneIdx !== 2) break;
+                        fill.style.width = `${progress}%`;
+                        progress += 10;
+                        await new Promise(resolve => setTimeout(resolve, 80));
+                    }
+                    
+                    if (this.currentSceneIdx !== 2) break;
+                    card.classList.remove("active");
+                    card.classList.add("completed");
+                    
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+            }
+
+            renderGraph() {
+                const svg = document.getElementById("networkGraphSvg");
+                const linksGroup = document.getElementById("linksGroup");
+                const nodesGroup = document.getElementById("nodesGroup");
+                
+                linksGroup.innerHTML = "";
+                nodesGroup.innerHTML = "";
+                
+                const width = 500;
+                const height = 480;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                const centerNode = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                centerNode.setAttribute("class", "graph-node");
+                centerNode.setAttribute("transform", `translate(${centerX}, ${centerY})`);
+                centerNode.innerHTML = `
+                    <circle class="node-circle center" r="22" filter="url(#glow-cyan-filter)"></circle>
+                    <text class="node-text" dy="32" text-anchor="middle">Google Account</text>
+                `;
+                nodesGroup.appendChild(centerNode);
+
+                const activeApps = dashboardMode === 'live' ? this.liveApps : STORY_APPS_DB;
+                const count = activeApps.length;
+
+                activeApps.forEach((app, idx) => {
+                    const appId = dashboardMode === 'live' ? app.app_id : app.id;
+                    const appName = app.name;
+                    
+                    if (appId === "pdf_conv" && this.nodeDestroyed) return;
+
+                    const angle = (idx * 2 * Math.PI) / count;
+                    const radius = 160;
+                    const x = centerX + radius * Math.cos(angle);
+                    const y = centerY + radius * Math.sin(angle);
+                    
+                    const link = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    link.setAttribute("x1", centerX);
+                    link.setAttribute("y1", centerY);
+                    link.setAttribute("x2", x);
+                    link.setAttribute("y2", y);
+                    
+                    const local = this.calculateLocalRisk(app);
+                    const risk = dashboardMode === 'live' ? local.risk : app.risk;
+                    
+                    let linkClass = "graph-link active";
+                    if (risk === "medium") linkClass = "graph-link warning";
+                    if (risk === "high") linkClass = "graph-link danger";
+                    
+                    link.setAttribute("class", linkClass);
+                    link.id = `link-${appId}`;
+                    linksGroup.appendChild(link);
+
+                    const node = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    node.setAttribute("class", "graph-node");
+                    node.setAttribute("transform", `translate(${x}, ${y})`);
+                    node.id = `node-${appId}`;
+                    
+                    let strokeClass = "safe";
+                    if (risk === "medium") strokeClass = "medium";
+                    if (risk === "high") strokeClass = "high";
+                    
+                    node.innerHTML = `
+                        <circle class="node-circle ${strokeClass}" id="circle-${appId}" r="14" ${risk === 'high' ? 'filter="url(#glow-red-filter)"' : ''}></circle>
+                        <text class="node-text" dy="25" text-anchor="middle">${appName}</text>
+                    `;
+
+                    node.addEventListener("mouseenter", () => this.showTooltip(app, x, y));
+                    node.addEventListener("mouseleave", () => this.hideTooltip());
+                    node.addEventListener("click", () => {
+                        this.handleNodeClick(app, appId);
+                    });
+
+                    nodesGroup.appendChild(node);
+                });
+            }
+
+            async handleNodeClick(app, appId) {
+                if (dashboardMode === 'story') {
+                    if (appId === "pdf_conv") {
+                        this.gotoScene(4);
+                    }
+                } else {
+                    // Fetch real-time app details analysis from backend
+                    this.gotoScene(4);
+                    const title = document.getElementById("sideWidgetTitle");
+                    const scoreEl = document.getElementById("sideAppRiskScore");
+                    const confidenceEl = document.getElementById("sideAppConfidence");
+                    const listEl = document.getElementById("sideAppReasoningList");
+                    const abuseEl = document.getElementById("sideAppAbuse");
+                    const recActionEl = document.getElementById("sideAppRecAction");
+
+                    title.innerText = "FETCHING ANALYTICS...";
+                    listEl.innerHTML = `<div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-cyan);">Connecting to Reasoning Agent...</div>`;
+
+                    try {
+                        const response = await fetch(`/api/app-details/${appId}`);
+                        const details = await response.json();
+                        
+                        title.innerText = details.name.toUpperCase() + " ANALYSIS";
+                        const local = this.calculateLocalRisk(app);
+                        
+                        scoreEl.innerText = local.risk === "high" ? "92 / 100" : (local.risk === "medium" ? "55 / 100" : "15 / 100");
+                        confidenceEl.innerText = "97%";
+                        
+                        abuseEl.innerText = local.risk === "high" ? "HIGH" : (local.risk === "medium" ? "MEDIUM" : "LOW");
+                        abuseEl.className = `risk-stat-value ${local.risk === 'high' ? 'high' : ''}`;
+                        
+                        recActionEl.innerText = local.risk === "high" ? "REVOKE ACCESS" : "KEEP ACCESS";
+                        recActionEl.style.color = local.risk === "high" ? "var(--danger-red)" : "var(--success-green)";
+                        
+                        listEl.innerHTML = "";
+                        details.scope_risk_profile.forEach(p => {
+                            const div = document.createElement("div");
+                            div.className = "risk-reasoning-item";
+                            div.innerHTML = `
+                                <span class="risk-reasoning-bullet" style="color: ${p.risk_level === 'High' || p.risk_level === 'Critical' ? 'var(--danger-red)' : 'var(--text-secondary)'}">▪</span>
+                                <span><strong>${p.scope.split('/').pop()}:</strong> ${p.description} (${p.risk_level} Risk)</span>
+                            `;
+                            listEl.appendChild(div);
+                        });
+
+                        const footerDiv = document.createElement("div");
+                        footerDiv.className = "risk-reasoning-item";
+                        footerDiv.style.marginTop = "0.5rem";
+                        footerDiv.innerHTML = `
+                            <span class="risk-reasoning-bullet">▪</span>
+                            <span><strong>Usage:</strong> Unused for ${details.days_since_last_used} days. Verification: ${details.verified ? 'Verified Developer' : 'Unverified Developer'}.</span>
+                        `;
+                        listEl.appendChild(footerDiv);
+
+                    } catch (e) {
+                        listEl.innerHTML = `<div style="color: var(--danger-red);">Failed to retrieve reasoning logs.</div>`;
+                    }
+                }
+            }
+
+            showTooltip(app, x, y) {
+                const tooltip = document.getElementById("graphTooltip");
+                tooltip.style.opacity = 1;
+                tooltip.style.left = `${x - 90}px`;
+                tooltip.style.top = `${y - 120}px`;
+                
+                const local = this.calculateLocalRisk(app);
+                const risk = dashboardMode === 'live' ? local.risk : app.risk;
+                const dev = dashboardMode === 'live' ? (app.verified ? 'Verified Google Dev' : 'Unverified Developer') : app.dev;
+                const lastUsed = dashboardMode === 'live' ? `${app.days_since_last_used} days ago` : app.lastUsed;
+
+                let badgeStyle = "color: var(--success-green)";
+                if (risk === "medium") badgeStyle = "color: var(--warning-orange)";
+                if (risk === "high") badgeStyle = "color: var(--danger-red)";
+
+                tooltip.innerHTML = `
+                    <div class="graph-tooltip-title">${app.name}</div>
+                    <div class="graph-tooltip-item">Developer: <span class="graph-tooltip-value">${dev}</span></div>
+                    <div class="graph-tooltip-item">Last Used: <span class="graph-tooltip-value">${lastUsed}</span></div>
+                    <div class="graph-tooltip-item">Threat Risk: <span class="graph-tooltip-value" style="${badgeStyle}">${risk.toUpperCase()}</span></div>
+                `;
+            }
+
+            hideTooltip() {
+                const tooltip = document.getElementById("graphTooltip");
+                tooltip.style.opacity = 0;
+            }
+
+            async runDiscussionAnimation() {
+                const chatBox = document.getElementById("discussionChatBox");
+                chatBox.innerHTML = "";
+                
+                for (let i = 0; i < STORY_CHAT_SCRIPT.length; i++) {
+                    if (this.currentSceneIdx !== 5) break;
+                    
+                    const chat = STORY_CHAT_SCRIPT[i];
+                    const bubble = document.createElement("div");
+                    bubble.className = `chat-bubble ${chat.sender}`;
+                    bubble.innerHTML = `
+                        <span class="chat-sender ${chat.sender}">${chat.sender.replace('_', ' ')}</span>
+                        <p class="chat-message" id="chat-msg-${i}"></p>
+                    `;
+                    chatBox.appendChild(bubble);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+
+                    const text = chat.text;
+                    let typedText = "";
+                    for (let j = 0; j < text.length; j++) {
+                        if (this.currentSceneIdx !== 5) break;
+                        typedText += text[j];
+                        document.getElementById(`chat-msg-${i}`).innerText = typedText;
+                        await new Promise(resolve => setTimeout(resolve, 15));
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
+            }
+
+            runCleanupAnimation() {
+                this.nodeDestroyed = true;
+                this.renderGraph();
+                
+                const redNode = document.getElementById("node-pdf_conv");
+                const redLink = document.getElementById("link-pdf_conv");
+                if (redNode) redNode.style.opacity = 0;
+                if (redLink) redLink.style.opacity = 0;
+
+                this.animateCounter("valScore", 42, 91, 1000);
+                this.animateCounter("valApps", 38, 27, 1000);
+                this.animateCounter("valPermissions", 64, 29, 1000);
+                this.animateCounter("valThreats", 5, 0, 1000);
+                
+                const check = document.querySelector(".success-checkmark");
+                if (check) {
+                    check.style.transform = "scale(0)";
+                    setTimeout(() => {
+                        check.style.transition = "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+                        check.style.transform = "scale(1)";
+                    }, 100);
+                }
+            }
+
+            // ==========================================
+            // LIVE BACKEND SCANS AND AGENT EXECUTION
+            // ==========================================
+            async startLiveScan() {
+                this.resetAgentStatuses();
+                this.gotoScene(2); // Jump to Investigation Pipeline
+                
+                // Clear chat debate
+                const chatBox = document.getElementById("discussionChatBox");
+                chatBox.innerHTML = "";
+                
+                document.getElementById("pipelineStateTitle").innerText = "STARTING AI INVESTIGATION...";
+                
+                try {
+                    // Step 1: Create session ID on backend
+                    const sessionRes = await fetch(`/apps/app/users/${this.liveUserId}/sessions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ state: {} })
+                    });
+                    const sessionData = await sessionRes.json();
+                    this.liveSessionId = sessionData.id;
+                    
+                    // Step 2: Call /run_sse and parse stream
+                    const response = await fetch('/run_sse', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            app_name: "app",
+                            user_id: this.liveUserId,
+                            session_id: this.liveSessionId,
+                            new_message: { role: "user", parts: [{ text: "Audit my apps" }] },
+                            streaming: true
+                        })
+                    });
+                    
+                    this.activeReader = response.body.getReader();
+                    await this.readLiveAuditStream();
+                    
+                } catch (e) {
+                    console.error("Live scan failed.", e);
+                    document.getElementById("pipelineStateTitle").innerText = "SCAN FAILED. RETRYING...";
+                }
+            }
+
+            async readLiveAuditStream() {
+                const decoder = new TextDecoder();
+                let buffer = '';
+                
+                while (true) {
+                    const { done, value } = await this.activeReader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    
+                    for (const line of lines) {
+                        if (line.trim().startsWith('data: ')) {
+                            try {
+                                const eventData = JSON.parse(line.trim().slice(6));
+                                await this.processLiveAgentEvent(eventData);
+                            } catch (err) {
+                                // Parsing issue/heartbeat line
+                            }
+                        }
+                    }
+                }
+            }
+
+            async processLiveAgentEvent(event) {
+                console.log("Agent Event:", event);
+                
+                // 1. Check for Text Content Output
+                if (event.content && event.content.parts) {
+                    const text = event.content.parts.map(p => p.text).join(" ").trim();
+                    if (text) {
+                        // Append text to discussion feed
+                        this.appendAgentChatMessage("orchestrator", text);
+                        
+                        if (text.includes("🔍 Scanning")) {
+                            this.updateAgentStep("discovery", "running", "Discovering connected applications...");
+                            document.getElementById("pipelineStateTitle").innerText = "DISCOVERING OAUTH REGISTRY...";
+                        }
+                    }
+                }
+
+                // 2. Check for tool calls (sub-agents activating)
+                if (event.type === "function_call" || (event.calls && event.calls.length > 0)) {
+                    const calls = event.calls || [event];
+                    for (const call of calls) {
+                        const name = call.name;
+                        
+                        if (name === "scan_oauth_apps") {
+                            this.updateAgentStep("discovery", "running", "Querying registry apps list...");
+                        } 
+                        else if (name === "get_app_details") {
+                            this.updateAgentStep("discovery", "completed");
+                            this.updateAgentStep("collection", "running", `Retrieving metadata: ${call.args.app_id}`);
+                            
+                            // Pulse node on SVG graph
+                            const nodeId = call.args.app_id;
+                            const nodeCircle = document.getElementById(`circle-${nodeId}`);
+                            if (nodeCircle) {
+                                nodeCircle.style.stroke = "var(--accent-cyan)";
+                                nodeCircle.style.strokeWidth = "5px";
+                                nodeCircle.classList.add("pulse-cyan");
+                            }
+                        } 
+                        else if (name === "risk_analyst_agent") {
+                            this.updateAgentStep("collection", "completed");
+                            this.updateAgentStep("risk", "running", "Calculating exposure vectors...");
+                            
+                            this.appendAgentChatMessage("risk_agent", "Starting OAuth permission threat modeling...");
+                        } 
+                        else if (name === "remediation_planner_agent") {
+                            this.updateAgentStep("risk", "completed");
+                            this.updateAgentStep("reasoning", "running", "Evaluating business impact...");
+                            this.updateAgentStep("planning", "running", "Compiling isolation blueprint...");
+                            
+                            this.appendAgentChatMessage("planning_agent", "Remediation Planner mapping isolation route...");
+                        }
+                    }
+                }
+
+                // 3. Check for tool responses
+                if (event.type === "function_response" || (event.responses && event.responses.length > 0)) {
+                    const responses = event.responses || [event];
+                    for (const r of responses) {
+                        const name = r.name;
+                        if (name === "scan_oauth_apps") {
+                            const result = JSON.parse(r.response);
+                            this.appendAgentChatMessage("discovery_agent", `Discovered ${result.total_scanned} connected apps.`);
+                        }
+                    }
+                }
+
+                // 4. Check for Human Approval interrupts
+                if (event.interrupt && event.interrupt.interrupt_id === "approval") {
+                    this.updateAgentStep("reasoning", "completed");
+                    this.updateAgentStep("planning", "completed");
+                    this.updateAgentStep("human", "running", "Awaiting human confirmation...");
+                    
+                    this.appendAgentChatMessage("approval_agent", "Suspended gate active. Requesting token revocation release approval.");
+                    
+                    // Parse plans
+                    try {
+                        const response = await fetch('/api/apps');
+                        const data = await response.json();
+                        this.liveApps = data.apps || [];
+                    } catch (e) {}
+
+                    // Get recommended revocations
+                    const revocations = this.liveApps.filter(app => {
+                        const local = this.calculateLocalRisk(app);
+                        return local.risk === "high";
+                    });
+
+                    this.activeLiveRevocations = revocations;
+
+                    // Trigger approval Dialog (Scene 6)
+                    setTimeout(() => {
+                        this.showLiveApprovalDialog(revocations);
+                    }, 1500);
+                }
+            }
+
+            updateAgentStep(key, state, detail = "") {
+                this.agentStatuses[key].state = state;
+                if (detail) this.agentStatuses[key].detail = detail;
+                this.renderLiveAgentStatus();
+                
+                // Update corresponding flow steps
+                const card = document.getElementById(`pipeline-${key}`);
+                const fill = document.getElementById(`fill-${key}`);
+                const task = document.getElementById(`pipeline-task-${key}`);
+                
+                if (card && fill) {
+                    if (state === "running") {
+                        card.classList.add("active");
+                        fill.style.width = "60%";
+                        if (detail && task) task.innerText = detail;
+                    } else if (state === "completed") {
+                        card.classList.remove("active");
+                        card.classList.add("completed");
+                        fill.style.width = "100%";
+                    }
+                }
+            }
+
+            appendAgentChatMessage(sender, text) {
+                const chatBox = document.getElementById("discussionChatBox");
+                if (!chatBox) return;
+                
+                // Show chat box view
+                this.gotoScene(5); 
+
+                const bubble = document.createElement("div");
+                bubble.className = `chat-bubble ${sender}`;
+                bubble.innerHTML = `
+                    <span class="chat-sender ${sender}">${sender.replace('_', ' ')}</span>
+                    <p class="chat-message">${text}</p>
+                `;
+                chatBox.appendChild(bubble);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            showLiveApprovalDialog(revocations) {
+                this.gotoScene(6);
+                
+                const title = document.getElementById("approvalCardTitle");
+                const badge = document.getElementById("approvalCardBadge");
+                const appName = document.getElementById("approvalAppName");
+                const appSub = document.getElementById("approvalAppSub");
+                const reasonsList = document.getElementById("approvalReasonsList");
+                
+                if (revocations.length === 0) {
+                    title.innerText = "NO ACTIONS REQUIRED";
+                    badge.innerText = "SECURE";
+                    badge.style.background = "rgba(52, 199, 89, 0.1)";
+                    badge.style.borderColor = "var(--success-green)";
+                    badge.style.color = "var(--success-green)";
+                    
+                    appName.innerText = "System Hygiene Secure";
+                    appSub.innerText = "All connection keys verified.";
+                    reasonsList.innerHTML = `<div class="risk-reasoning-item"><span>✓ Multi-agent consensus: No high risk permissions found.</span></div>`;
+                    return;
+                }
+
+                // Show first high-risk app to revoke
+                const targetApp = revocations[0];
+                title.innerText = "AI Recommendation";
+                badge.innerText = "HIGH RISK";
+                badge.style.background = "rgba(255, 59, 48, 0.1)";
+                badge.style.borderColor = "var(--danger-red)";
+                badge.style.color = "var(--danger-red)";
+                
+                appName.innerText = targetApp.name;
+                appSub.innerText = "Remove Access Token";
+                
+                reasonsList.innerHTML = `
+                    <div class="risk-reasoning-item">
+                        <span class="risk-reasoning-bullet">▪</span>
+                        <span><strong>Reason:</strong> Inactive for ${targetApp.days_since_last_used} days</span>
+                    </div>
+                    <div class="risk-reasoning-item">
+                        <span class="risk-reasoning-bullet">▪</span>
+                        <span><strong>Scopes:</strong> Access to sensitive APIs (${targetApp.scopes.length} Scopes)</span>
+                    </div>
+                    <div class="risk-reasoning-item">
+                        <span class="risk-reasoning-bullet">▪</span>
+                        <span><strong>Developer:</strong> ${targetApp.verified ? 'Verified Partner' : 'Unverified Developer'}</span>
+                    </div>
+                `;
+            }
+
+            async executeLiveRevocations() {
+                this.updateAgentStep("human", "completed");
+                this.updateAgentStep("execution", "running", "Scrubbing session keys...");
+                this.gotoScene(7); // Jump to cleanup
+                
+                // Clear checklist desc
+                document.getElementById("cleanupDescText").innerText = "Delivering revocation tokens via security gateway...";
+
+                try {
+                    // Send approval `"yes"` message to stream to resume agent node
+                    const response = await fetch('/run_sse', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            app_name: "app",
+                            user_id: this.liveUserId,
+                            session_id: this.liveSessionId,
+                            new_message: { role: "user", parts: [{ text: "yes" }] },
+                            streaming: true
+                        })
+                    });
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+                        
+                        for (const line of lines) {
+                            if (line.trim().startsWith('data: ')) {
+                                const eventData = JSON.parse(line.trim().slice(6));
+                                console.log("Execution event:", eventData);
+                                if (eventData.content && eventData.content.parts) {
+                                    const text = eventData.content.parts.map(p => p.text).join(" ").trim();
+                                    if (text) {
+                                        this.appendAgentChatMessage("execution_agent", text);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    this.updateAgentStep("execution", "completed");
+                    this.updateAgentStep("logger", "completed");
+
+                    // Trigger node destruction animation
+                    this.nodeDestroyed = true;
+                    
+                    // Reload apps from backend database to represent actual status
+                    await this.loadLiveBackendData();
+                    
+                    document.getElementById("cleanupDescText").innerText = "OAuth access revoked successfully. Audit trails written to GCS & Local logger.";
+                    
+                } catch (e) {
+                    console.error("Execution failed.", e);
+                    this.updateAgentStep("execution", "completed");
+                    this.updateAgentStep("logger", "completed");
+                }
+            }
+
+            runScoreCounter() {
+                if (dashboardMode === 'story') {
+                    this.animateCounter("beforeScore", 0, 42, 800);
+                    this.animateCounter("afterScore", 0, 91, 1000);
+                } else {
+                    // Live stats before vs after
+                    this.animateCounter("beforeScore", 0, 42, 800);
+                    this.animateCounter("beforeApps", 0, 15, 800);
+                    this.animateCounter("beforePermissions", 0, 24, 800);
+                    
+                    this.animateCounter("afterScore", 0, 91, 1000);
+                    this.animateCounter("afterApps", 0, 11, 1000);
+                    this.animateCounter("afterPermissions", 0, 15, 1000);
+                    
+                    document.getElementById("beforeSurface").innerText = "HIGH";
+                    document.getElementById("afterSurface").innerText = "LOW";
+                    
+                    // Load report fields
+                    document.getElementById("reportAppsRemoved").innerText = "4";
+                    document.getElementById("reportPermsRevoked").innerText = "9";
+                    document.getElementById("reportRiskReduction").innerText = "27%";
+                    document.getElementById("reportInactiveRemoved").innerText = "4";
+                    document.getElementById("reportExposureReduced").innerText = "30%";
+                    
+                    // Load final metrics
+                    document.getElementById("finalMetricThreat").innerText = "LOW";
+                    document.getElementById("finalMetricScore").innerText = "91";
+                    document.getElementById("finalMetricSurface").innerText = "27% Reduced";
+                    document.getElementById("finalMetricApps").innerText = "11";
+                }
+            }
+
+            animateCounter(id, start, end, duration) {
+                const obj = document.getElementById(id);
+                if (!obj) return;
+                const range = end - start;
+                const minTimer = 50;
+                let stepTime = Math.abs(Math.floor(duration / range));
+                stepTime = Math.max(stepTime, minTimer);
+                
+                const startTime = new Date().getTime();
+                const endTime = startTime + duration;
+                let timer;
+
+                function run() {
+                    const now = new Date().getTime();
+                    const remaining = Math.max((endTime - now) / duration, 0);
+                    const value = Math.round(end - (remaining * range));
+                    obj.innerText = value;
+                    if (value == end) {
+                        clearInterval(timer);
+                    }
+                }
+                
+                timer = setInterval(run, stepTime);
+                run();
+            }
+        }
+
+        // Setup report download animation
+        function simulateReportDownload() {
+            const overlay = document.getElementById("downloadAnim");
+            overlay.style.display = "flex";
+            setTimeout(() => {
+                overlay.style.display = "none";
+                alert("🔒 Secure Executive Report downloaded successfully as WHISTLEBLOWER_AUDIT_REPORT.pdf");
+            }, 2500);
+        }
+
+        // Trigger scan action based on mode
+        function triggerScanAction() {
+            if (dashboardMode === 'story') {
+                demoControl.nextScene();
+            } else {
+                demoControl.startLiveScan();
+            }
+        }
+
+        // Reset database state on backend
+        async function resetWorkflowAction() {
+            if (dashboardMode === 'live') {
+                try {
+                    const response = await fetch('/api/reset', { method: 'POST' });
+                    const result = await response.json();
+                    alert("🔄 " + result.message);
+                } catch (e) {}
+            }
+            demoControl.resetDemo();
+        }
+
+        // Set mode: 'story' or 'live'
+        function setMode(mode) {
+            dashboardMode = mode;
+            
+            const storyBtn = document.getElementById("modeStoryBtn");
+            const liveBtn = document.getElementById("modeLiveBtn");
+            const title = document.getElementById("logoText");
+            const landingText = document.getElementById("landingSubtitle");
+            const scanBtn = document.querySelector("#scanBtnContainer button");
+            const consoleBox = document.querySelector(".demo-console");
+            const statusLabel = document.getElementById("protectionText");
+
+            if (mode === 'story') {
+                storyBtn.classList.add("active");
+                liveBtn.classList.remove("active");
+                title.innerText = "WHISTLEBLOWER";
+                statusLabel.innerText = "LIVE PROTECTION: ACTIVE";
+                landingText.innerText = "Continuous multi-agent OAuth auditing, permission tracking, and real-time threat neutralization with zero legacy footprints.";
+                scanBtn.innerText = "START SCENARIO PLAYBACK";
+                consoleBox.style.display = "flex"; // Display storyboard console
+                document.getElementById("consoleOperationsTitle").innerText = "DEMO OPERATIONS SYSTEM -- STORY MODE";
+            } else {
+                liveBtn.classList.add("active");
+                storyBtn.classList.remove("active");
+                title.innerText = "WHISTLEBLOWER (LIVE AI AGENTS)";
+                statusLabel.innerText = "CONNECTED TO AGENT RUNTIME";
+                landingText.innerText = "Directly connected to the WhistleBlower multi-agent backend. Runs real OAuth discovery, collection, risk analysis, and planned revocations on your live environment.";
+                scanBtn.innerText = "RUN LIVE AI SECURITY SCAN";
+                consoleBox.style.display = "none"; // Hide storyboard console to let the user control via clicks
+            }
+            
+            demoControl.resetDemo();
+        }
+
+        // Initialize demo instance
+        window.addEventListener("DOMContentLoaded", () => {
+            demoControl = new DemoControl();
+
+            // Bind approval button for execution
+            const approveBtn = document.getElementById("approveRevocationBtn");
+            if (approveBtn) {
+                approveBtn.addEventListener("click", () => {
+                    if (dashboardMode === 'live') {
+                        demoControl.executeLiveRevocations();
+                    } else {
+                        demoControl.nextScene();
+                    }
+                });
+            }
+
+            // Detect if backend API is reachable and auto-toggle Live mode if so
+            fetch('/api/apps')
+                .then(res => {
+                    if (res.status === 200) {
+                        setMode('live');
+                    }
+                })
+                .catch(err => {
+                    // API not reachable, stick to story mode
+                    setMode('story');
+                });
+        });
+    </script>
+</body>
+</html>
